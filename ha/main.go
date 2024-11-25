@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
+	"time"
 
 	redis "github.com/redis/go-redis/v9"
 )
@@ -27,9 +29,15 @@ func masterSet() {
 		log.Fatal(err)
 	}
 
-	val := "222"
+	val := "555"
 	if err := rdb.Set(context.Background(), "key1", val, 0).Err(); err != nil {
 		log.Panicf("set %v not success: %s\n", val, err)
+	}
+
+	all := 1
+	intCmd := rdb.Wait(context.Background(), all, 3*time.Second)
+	if int(intCmd.Val()) != all {
+		slog.Error("not guarantee consistency")
 	}
 
 	fmt.Printf("set %q to master successfully\n", val)
