@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  redis-1:
+    image: "redis:latest"
+    container_name: redis-1
+    ports:
+      - "6390:6380"  # Map external port for Redis commands
+      - "16380:16380"  # Map external port for Redis cluster bus
+    volumes:
+      - ./redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf --maxmemory 1gb --maxmemory-policy allkeys-lru --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --appendfilename appendonly-1.aof --cluster-announce-ip <replace_with_your_server_external_ip> --cluster-announce-port 6390 --cluster-announce-bus-port 16380
+
+  redis-2:
+    image: "redis:latest"
+    container_name: redis-2
+    ports:
+      - "6380:6380"  # Map external port for Redis commands
+      - "16381:16380"  # Map external port for Redis cluster bus
+    volumes:
+      - ./redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf --maxmemory 1gb --maxmemory-policy allkeys-lru --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --appendfilename appendonly-2.aof --cluster-announce-ip <replace_with_your_server_external_ip> --cluster-announce-port 6380 --cluster-announce-bus-port 16381
+
+  redis-3:
+    image: "redis:latest"
+    container_name: redis-3
+    ports:
+      - "6381:6380"  # Map external port for Redis commands
+      - "16382:16380"  # Map external port for Redis cluster bus
+    volumes:
+      - ./redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf --maxmemory 1gb --maxmemory-policy allkeys-lru --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --appendfilename appendonly-3.aof --cluster-announce-ip <replace_with_your_server_external_ip> --cluster-announce-port 6381 --cluster-announce-bus-port 16382
+
+  redisinsight:
+    image: "redis/redisinsight:latest"
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight-data:/db
+
+volumes:
+  redisinsight-data:
+
+networks:
+  default:
+    driver: bridge
