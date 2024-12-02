@@ -1,5 +1,7 @@
 up:
 	docker compose up -d
+down:
+	docker compose down
 info:
 	docker exec mongo1 sh -c "mongosh --eval 'rs.status()'"
 disconnect:

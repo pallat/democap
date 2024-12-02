@@ -13,15 +13,22 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
+const (
+	mongo2 = 2
+	mongo3 = 3
+)
+
 func main() {
 	primary()
-	secondary(1)
-	secondary(2)
+	secondary(mongo2)
+	secondary(mongo3)
 }
 
 func primary() {
 	clientOpts := options.Client().ApplyURI(
-		"mongodb://localhost:27017/?connect=direct")
+		// "mongodb://mongo1:27017/?connect=direct")
+		// "mongodb://localhost:27017/?connect=direct")
+		"mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0")
 	client, err := mongo.Connect(clientOpts)
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +50,7 @@ func primary() {
 	}
 
 	collection := client.Database("db").Collection("coll")
-	result, err := collection.InsertOne(ctx, bson.M{"x": 1})
+	result, err := collection.InsertOne(ctx, bson.M{"x": 2})
 	if err != nil {
 		log.Panic(err)
 	}
@@ -51,7 +58,7 @@ func primary() {
 }
 
 func secondary(num int) {
-	uri := fmt.Sprintf("mongodb://localhost:%d/?connect=direct", 27016+num)
+	uri := fmt.Sprintf("mongodb://mongo%d:27017/?connect=direct", num)
 
 	clientOpts := options.Client().ApplyURI(
 		uri)
